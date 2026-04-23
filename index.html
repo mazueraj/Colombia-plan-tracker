@@ -6,21 +6,22 @@
     <title>Mission 89kg</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="89kg Mission">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1616/1616487.png">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#ffffff">
 
     <style>
         :root {
             --primary: #0f172a;
             --accent: #3b82f6;
-            --bg: #020617;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
             --success: #22c55e;
-            --warning: #f59e0b;
             --danger: #ef4444;
+            --border: #e2e8f0;
         }
 
         body { 
@@ -31,42 +32,44 @@
         }
 
         header { 
-            background: linear-gradient(180deg, var(--primary) 0%, var(--bg) 100%);
-            color: white; padding: 40px 20px 20px; text-align: center; 
+            background: white;
+            color: var(--primary); padding: 40px 20px 20px; text-align: center; 
+            border-bottom: 1px solid var(--border);
         }
 
         #countdown-container { 
-            background: rgba(59, 130, 246, 0.1);
+            background: #f8fafc;
             color: var(--accent); padding: 12px; 
             font-size: 1.1rem; font-weight: 800; border-radius: 12px;
-            margin: 10px 20px; border: 1px solid rgba(59, 130, 246, 0.3);
+            margin: 10px 20px; border: 1px solid var(--border);
         }
 
-        .tabs-container { background: var(--primary); position: sticky; top: 0; padding: 10px 10px 0; border-bottom: 1px solid #334155; z-index: 100; }
+        .tabs-container { background: white; position: sticky; top: 0; padding: 10px 10px 0; border-bottom: 1px solid var(--border); z-index: 100; }
         .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
         .tab-btn { 
-            padding: 12px 20px; border: none; background: #334155; 
+            padding: 12px 20px; border: 1px solid var(--border); background: #f8fafc; 
             cursor: pointer; font-weight: 700; border-radius: 10px; 
-            color: #94a3b8; white-space: nowrap;
+            color: var(--text-light); white-space: nowrap;
         }
-        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 
         .container { padding: 20px; }
         .day-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
         .day-card { 
-            background: var(--card-bg); border: 2px solid #334155; 
+            background: var(--card-bg); border: 1px solid var(--border); 
             border-radius: 24px; padding: 20px; transition: 0.4s;
-            position: relative;
+            position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         
         /* Auto-Grey for Past Days */
-        .day-card.past { opacity: 0.4; filter: grayscale(80%); pointer-events: none; }
+        .day-card.past { opacity: 0.5; filter: grayscale(100%); pointer-events: none; background: #f8fafc; }
         
         /* Highlight for Today */
         .day-card.today { 
             border-color: var(--accent); 
-            box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+            border-width: 2px;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
             transform: scale(1.02);
             z-index: 10;
         }
@@ -77,38 +80,40 @@
             font-size: 0.7rem; font-weight: 900;
         }
 
-        .day-header { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--accent); }
+        .day-header { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--primary); }
         .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .data-box { background: #0f172a; padding: 12px; border-radius: 16px; text-align: center; border: 1px solid #1e293b; }
-        .data-box.actual { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
-        .data-box small { display: block; font-size: 0.65rem; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        .data-box input { width: 100%; background: transparent; border: none; text-align: center; font-size: 1.2rem; font-weight: 800; color: white; outline: none; }
+        .data-box { background: #f8fafc; padding: 12px; border-radius: 16px; text-align: center; border: 1px solid var(--border); }
+        .data-box.actual { border-color: var(--accent); background: white; }
+        .data-box small { display: block; font-size: 0.65rem; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px; font-weight: 700; }
+        .data-box input { width: 100%; background: transparent; border: none; text-align: center; font-size: 1.2rem; font-weight: 800; color: var(--accent); outline: none; }
 
         .check-item { 
             display: flex; align-items: center; padding: 12px; 
-            background: rgba(255,255,255,0.03); margin-bottom: 8px;
+            background: #f8fafc; margin-bottom: 8px;
             border-radius: 12px; font-size: 0.95rem; cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
         }
+        .check-item:has(input:checked) { background: #f0f9ff; border-color: #bae6fd; color: var(--accent); }
         input[type="checkbox"] { width: 22px; height: 22px; margin-right: 15px; accent-color: var(--accent); }
 
-        .progress-container { margin-top: 20px; height: 6px; background: #0f172a; border-radius: 10px; }
-        .progress-bar { height: 100%; width: 0%; border-radius: 10px; transition: 0.5s; }
+        .progress-container { margin-top: 20px; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; border-radius: 10px; transition: 0.5s ease-out; }
 
         .dash-toggle { 
             position: fixed; bottom: 30px; right: 20px; 
-            background: var(--accent); color: white; width: 60px; height: 60px; 
+            background: var(--primary); color: white; width: 60px; height: 60px; 
             border-radius: 30px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1001;
+            font-size: 1.5rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); z-index: 1001;
         }
     </style>
 </head>
 <body>
-    <div class="dash-toggle" onclick="alert('Week Progress: ' + document.getElementById('week-pct').innerText)">📈</div>
+    <div class="dash-toggle" onclick="alert('Stay focused! Every checkmark is 1% closer to 89kg.')">🚀</div>
     
     <header>
-        <h1 style="margin:0; font-size: 2.2rem; letter-spacing: -1px;">MISSION <span style="color:var(--accent)">89KG</span></h1>
+        <h1 style="margin:0; font-size: 2.2rem; letter-spacing: -1px; font-weight: 900;">MISSION <span style="color:var(--accent)">89KG</span></h1>
         <div id="countdown-container">COLOMBIA IN: <span id="timer">--d --h --m --s</span></div>
-        <div id="week-pct" style="display:none">0%</div>
     </header>
 
     <div class="tabs-container">
@@ -134,7 +139,7 @@
             for (let i = 0; i < 7; i++) {
                 let weekStart = new Date(startDate);
                 weekStart.setDate(startDate.getDate() + (i * 7));
-                tabsHtml += `<button class="tab-btn ${i===0?'active':''}" id="tbtn-${i}" onclick="showWeek(${i})">W${i+1}</button>`;
+                tabsHtml += `<button class="tab-btn ${i===0?'active':''}" id="tbtn-${i}" onclick="showWeek(${i})">Week ${i+1}</button>`;
                 weeksHtml += `<div id="week-${i}" class="week-content ${i===0?'active':''}"><div class="day-grid">`;
                 
                 days.forEach((dayName, j) => {
@@ -149,22 +154,22 @@
                     let dayId = `w${i}-d${j}`;
                     let calT = i === 0 ? "1,200" : "1,750";
                     let wgtT = (96.0 - (i * 1.0) - (j * 0.14)).toFixed(1);
-                    let dinner = i === 0 ? "🔴 No-Carb Dinner" : "🔵 Protein + 1 Cup Carb";
+                    let dinner = i === 0 ? "🥗 No-Carb Dinner" : "🍗 Protein + 1 Cup Carb";
 
                     weeksHtml += `
                         <div class="day-card ${dayStatus}" id="card-${dayId}">
-                            ${dayStatus === 'today' ? '<div class="today-label">CURRENT DAY</div>' : ''}
-                            <div class="day-header">${dayName} <span style="font-size:0.8rem; color:#64748b; float:right">${currentDay.getDate()}/${currentDay.getMonth()+1}</span></div>
+                            ${dayStatus === 'today' ? '<div class="today-label">TODAY</div>' : ''}
+                            <div class="day-header">${dayName} <span style="font-size:0.85rem; color:var(--text-light); float:right; font-weight:600;">${currentDay.getDate()}/${currentDay.getMonth()+1}</span></div>
                             <div class="data-row">
-                                <div class="data-box"><small>GOAL CAL</small><strong>${calT}</strong></div>
-                                <div class="data-box actual"><small>ACTUAL</small><input type="text" id="cal-${dayId}" oninput="saveData()" placeholder="0"></div>
+                                <div class="data-box"><small>Goal Cal</small><strong>${calT}</strong></div>
+                                <div class="data-box actual"><small>Actual</small><input type="text" id="cal-${dayId}" oninput="saveData()" placeholder="0"></div>
                             </div>
                             <div class="data-row">
-                                <div class="data-box"><small>GOAL KG</small><strong>${wgtT}</strong></div>
-                                <div class="data-box actual"><small>ACTUAL</small><input type="text" id="kg-${dayId}" oninput="saveData()" placeholder="0.0"></div>
+                                <div class="data-box"><small>Goal KG</small><strong>${wgtT}</strong></div>
+                                <div class="data-box actual"><small>Actual</small><input type="text" id="kg-${dayId}" oninput="saveData()" placeholder="0.0"></div>
                             </div>
                             <div class="checklist">
-                                ${["Shake + Protein", "2 Boiled Eggs", "Lunch Shake", "Tuna (95g)", dinner, "10k Steps", "4L Water"].map((item, idx) => `
+                                ${["Breakfast Shake", "2 Boiled Eggs", "Lunch Shake", "Tuna (95g)", dinner, "10k Steps", "4L Water"].map((item, idx) => `
                                     <label class="check-item"><input type="checkbox" id="chk-${dayId}-${idx}" onchange="updateDay('${dayId}')">${item}</label>
                                 `).join('')}
                             </div>
@@ -189,7 +194,9 @@
             const checks = card.querySelectorAll('input[type="checkbox"]');
             const done = card.querySelectorAll('input[type="checkbox"]:checked').length;
             const pct = (done / checks.length) * 100;
-            document.getElementById(`bar-${id}`).style.width = pct + '%';
+            const bar = document.getElementById(`bar-${id}`);
+            bar.style.width = pct + '%';
+            bar.style.backgroundColor = pct === 100 ? 'var(--success)' : 'var(--accent)';
             saveData();
         }
 
