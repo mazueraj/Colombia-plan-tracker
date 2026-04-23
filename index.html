@@ -133,4 +133,68 @@
         }
 
         function updateDay(dayId) {
-            const card = document.getElementById(
+            const card = document.getElementById(`card-${dayId}`);
+            const checks = card.querySelectorAll('input[type="checkbox"]');
+            const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
+            const percent = (checked / checks.length) * 100;
+            const bar = document.getElementById(`bar-${dayId}`);
+            
+            bar.style.width = percent + '%';
+            card.classList.remove('status-red', 'status-amber', 'status-green');
+            
+            if (percent === 100) { card.classList.add('status-green'); bar.style.backgroundColor = 'var(--success)'; }
+            else if (percent >= 40) { card.classList.add('status-amber'); bar.style.backgroundColor = 'var(--warning)'; }
+            else { card.classList.add('status-red'); bar.style.backgroundColor = 'var(--danger)'; }
+            
+            saveData();
+            updateDashboard();
+        }
+
+        function saveData() {
+            const data = {};
+            document.querySelectorAll('input').forEach(input => {
+                data[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            });
+            localStorage.setItem('dietTrackerData', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const data = JSON.parse(localStorage.getItem('dietTrackerData'));
+            if (!data) return;
+            Object.keys(data).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.type === 'checkbox') el.checked = data[id];
+                    else el.value = data[id];
+                }
+            });
+            document.querySelectorAll('.day-card').forEach(card => {
+                const dayId = card.id.replace('card-', '');
+                updateDay(dayId);
+            });
+        }
+
+        function updateDashboard() {
+            const activeWeek = document.querySelector('.week-content.active');
+            const checked = activeWeek.querySelectorAll('input[type="checkbox"]:checked').length;
+            const total = activeWeek.querySelectorAll('input[type="checkbox"]').length;
+            const score = Math.round((checked/total)*100) || 0;
+            document.getElementById('stats-content').innerHTML = `
+                <div style="font-size: 3rem; font-weight: 900; color: var(--accent); margin: 20px 0;">${score}%</div>
+                <p>WEEKLY SCORE</p>
+                <div style="background:#f1f5f9; height:12px; border-radius:6px; overflow:hidden">
+                    <div style="width: ${score}%; height:100%; background: var(--accent);"></div>
+                </div>
+            `;
+        }
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const dist = travelDate - now;
+            document.getElementById("timer").innerHTML = Math.floor(dist / 86400000) + "d " + Math.floor((dist % 86400000) / 3600000) + "h " + Math.floor((dist % 3600000) / 60000) + "m " + Math.floor((dist % 60000) / 1000) + "s ";
+        }, 1000);
+
+        init();
+    </script>
+</body>
+</html>
