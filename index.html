@@ -7,173 +7,129 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="89kg Mission">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1616/1616487.png">
     <meta name="theme-color" content="#ffffff">
 
     <style>
         :root {
-            --primary: #0f172a;
-            --accent: #3b82f6;
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --border: #e2e8f0;
+            --primary: #0f172a; --accent: #3b82f6; --bg: #f1f5f9; --card-bg: #ffffff;
+            --text: #1e293b; --text-light: #64748b; --success: #22c55e; --border: #e2e8f0;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; padding: 0; color: var(--text);
-            overscroll-behavior: none;
+            font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); 
+            margin: 0; padding: 0; color: var(--text); overscroll-behavior: none;
         }
 
-        header { 
-            background: white;
-            color: var(--primary); padding: 40px 20px 20px; text-align: center; 
-            border-bottom: 1px solid var(--border);
-        }
+        header { background: white; padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        #countdown-container { background: #f8fafc; color: var(--accent); padding: 12px; font-size: 1.1rem; font-weight: 800; border-radius: 12px; margin: 10px 20px; border: 1px solid var(--border); }
 
-        #countdown-container { 
-            background: #f8fafc;
-            color: var(--accent); padding: 12px; 
-            font-size: 1.1rem; font-weight: 800; border-radius: 12px;
-            margin: 10px 20px; border: 1px solid var(--border);
+        #dashboard { 
+            position: fixed; top: 0; right: -100%; width: 85%; max-width: 350px; height: 100%; 
+            background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.1); z-index: 2000; 
+            transition: 0.4s ease; padding: 40px 25px; box-sizing: border-box;
         }
+        #dashboard.open { right: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1999; }
+        .overlay.active { display: block; }
+
+        .stat-card { background: #f8fafc; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .stat-card h4 { margin: 0 0 5px 0; font-size: 0.7rem; text-transform: uppercase; color: var(--text-light); }
+        .stat-val { font-size: 1.4rem; font-weight: 900; }
 
         .tabs-container { background: white; position: sticky; top: 0; padding: 10px 10px 0; border-bottom: 1px solid var(--border); z-index: 100; }
         .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-        .tab-btn { 
-            padding: 12px 20px; border: 1px solid var(--border); background: #f8fafc; 
-            cursor: pointer; font-weight: 700; border-radius: 10px; 
-            color: var(--text-light); white-space: nowrap;
-        }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .tab-btn { padding: 12px 20px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer; font-weight: 700; border-radius: 10px; color: var(--text-light); white-space: nowrap; }
+        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        .container { padding: 20px; }
+        .week-content { display: none; }
+        .week-content.active { display: block; }
+
+        .container { padding: 20px; padding-bottom: 100px; }
         .day-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        
-        .day-card { 
-            background: var(--card-bg); border: 1px solid var(--border); 
-            border-radius: 24px; padding: 20px; transition: 0.4s;
-            position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Auto-Grey for Past Days */
-        .day-card.past { opacity: 0.5; filter: grayscale(100%); pointer-events: none; background: #f8fafc; }
-        
-        /* Highlight for Today */
-        .day-card.today { 
-            border-color: var(--accent); 
-            border-width: 2px;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
-            transform: scale(1.02);
-            z-index: 10;
-        }
-        .today-label { 
-            position: absolute; top: -12px; right: 20px; 
-            background: var(--accent); color: white; 
-            padding: 4px 12px; border-radius: 20px; 
-            font-size: 0.7rem; font-weight: 900;
-        }
+        .day-card { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 20px; position: relative; }
+        .day-card.past { opacity: 0.5; filter: grayscale(100%); pointer-events: none; }
+        .day-card.today { border-color: var(--accent); border-width: 2px; }
 
-        .day-header { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--primary); }
-        .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .data-box { background: #f8fafc; padding: 12px; border-radius: 16px; text-align: center; border: 1px solid var(--border); }
-        .data-box.actual { border-color: var(--accent); background: white; }
-        .data-box small { display: block; font-size: 0.65rem; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px; font-weight: 700; }
-        .data-box input { width: 100%; background: transparent; border: none; text-align: center; font-size: 1.2rem; font-weight: 800; color: var(--accent); outline: none; }
+        .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .data-box { background: #f8fafc; padding: 10px; border-radius: 12px; text-align: center; }
+        .data-box.actual { border: 1px solid var(--accent); background: white; }
+        .data-box input { width: 100%; background: transparent; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; color: var(--accent); outline: none; }
 
-        .check-item { 
-            display: flex; align-items: center; padding: 12px; 
-            background: #f8fafc; margin-bottom: 8px;
-            border-radius: 12px; font-size: 0.95rem; cursor: pointer;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
-        .check-item:has(input:checked) { background: #f0f9ff; border-color: #bae6fd; color: var(--accent); }
-        input[type="checkbox"] { width: 22px; height: 22px; margin-right: 15px; accent-color: var(--accent); }
+        .check-item { display: flex; align-items: center; padding: 10px; background: #f8fafc; margin-bottom: 6px; border-radius: 10px; font-size: 0.9rem; }
+        input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; accent-color: var(--accent); }
 
-        .progress-container { margin-top: 20px; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; border-radius: 10px; transition: 0.5s ease-out; }
-
-        .dash-toggle { 
-            position: fixed; bottom: 30px; right: 20px; 
-            background: var(--primary); color: white; width: 60px; height: 60px; 
-            border-radius: 30px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); z-index: 1001;
-        }
+        .progress-bar-wrap { background:#f1f5f9; height:6px; border-radius:10px; margin-top:15px; overflow:hidden; }
+        .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.4s; }
+        .dash-toggle { position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: white; width: 65px; height: 65px; border-radius: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 1001; }
     </style>
 </head>
 <body>
-    <div class="dash-toggle" onclick="alert('Stay focused! Every checkmark is 1% closer to 89kg.')">🚀</div>
-    
+    <div class="overlay" id="overlay" onclick="toggleDash()"></div>
+    <div id="dashboard">
+        <h2 style="margin-top:0">Mission Status</h2>
+        <div class="stat-card"><h4>Weekly Cal (Act/Goal)</h4><div class="stat-val" id="stat-cal">0 / 0</div></div>
+        <div class="stat-card"><h4>Latest Weight</h4><div class="stat-val" id="stat-weight">-- kg</div></div>
+        <div class="stat-card"><h4>Objectives</h4><div class="stat-val" id="stat-pct">0%</div><div class="progress-bar-wrap"><div id="stat-bar" style="height:100%; width:0%; background:var(--success); transition: 1s;"></div></div></div>
+        <button onclick="if(confirm('Reset all?')){localStorage.clear(); location.reload();}" style="width:100%; background:none; border:1px solid #fee2e2; color:#ef4444; padding:10px; border-radius:10px; margin-top:20px;">Reset Data</button>
+    </div>
+
+    <div class="dash-toggle" onclick="toggleDash()">📊</div>
+
     <header>
-        <h1 style="margin:0; font-size: 2.2rem; letter-spacing: -1px; font-weight: 900;">MISSION <span style="color:var(--accent)">89KG</span></h1>
-        <div id="countdown-container">COLOMBIA IN: <span id="timer">--d --h --m --s</span></div>
+        <h1 style="margin:0; font-weight: 900;">MISSION <span style="color:var(--accent)">89KG</span></h1>
+        <div id="countdown-container">COLOMBIA: <span id="timer">--d --h --m</span></div>
     </header>
 
-    <div class="tabs-container">
-        <div class="tabs" id="tabs-list"></div>
-    </div>
-
-    <div class="container">
-        <div id="weeks-container"></div>
-    </div>
+    <div class="tabs-container"><div class="tabs" id="tabs-list"></div></div>
+    <div class="container"><div id="weeks-container"></div></div>
 
     <script>
-        const startDate = new Date(2026, 3, 20); // Monday April 20, 2026
+        const startDate = new Date(2026, 3, 20); // Apr 20
         const travelDate = new Date("June 09, 2026 00:00:00").getTime();
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        let currentWeekIdx = 0;
+
+        function toggleDash() {
+            document.getElementById('dashboard').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+            if(document.getElementById('dashboard').classList.contains('open')) updateDashboard();
+        }
 
         function init() {
-            const now = new Date();
-            now.setHours(0,0,0,0);
-            
-            let tabsHtml = '';
-            let weeksHtml = '';
+            const now = new Date(); now.setHours(0,0,0,0);
+            let tabsHtml = ''; let weeksHtml = '';
             
             for (let i = 0; i < 7; i++) {
-                let weekStart = new Date(startDate);
-                weekStart.setDate(startDate.getDate() + (i * 7));
+                let weekStart = new Date(startDate); weekStart.setDate(startDate.getDate() + (i * 7));
                 tabsHtml += `<button class="tab-btn ${i===0?'active':''}" id="tbtn-${i}" onclick="showWeek(${i})">Week ${i+1}</button>`;
                 weeksHtml += `<div id="week-${i}" class="week-content ${i===0?'active':''}"><div class="day-grid">`;
                 
                 days.forEach((dayName, j) => {
-                    let currentDay = new Date(weekStart);
-                    currentDay.setDate(weekStart.getDate() + j);
-                    currentDay.setHours(0,0,0,0);
-
-                    let dayStatus = "";
-                    if (currentDay < now) dayStatus = "past";
-                    else if (currentDay.getTime() === now.getTime()) dayStatus = "today";
-
-                    let dayId = `w${i}-d${j}`;
-                    let calT = i === 0 ? "1,200" : "1,750";
+                    let cDay = new Date(weekStart); cDay.setDate(weekStart.getDate() + j); cDay.setHours(0,0,0,0);
+                    let status = (cDay < now) ? "past" : (cDay.getTime() === now.getTime() ? "today" : "");
+                    let id = `w${i}-d${j}`;
+                    let calT = (i === 0 || i === 1) ? 1200 : 1750;
                     let wgtT = (96.0 - (i * 1.0) - (j * 0.14)).toFixed(1);
-                    let dinner = i === 0 ? "🥗 No-Carb Dinner" : "🍗 Protein + 1 Cup Carb";
+                    let dinner = (i === 0 || i === 1) ? "🥗 No-Carb Dinner" : "🍗 Protein + 1 Cup Carb";
 
                     weeksHtml += `
-                        <div class="day-card ${dayStatus}" id="card-${dayId}">
-                            ${dayStatus === 'today' ? '<div class="today-label">TODAY</div>' : ''}
-                            <div class="day-header">${dayName} <span style="font-size:0.85rem; color:var(--text-light); float:right; font-weight:600;">${currentDay.getDate()}/${currentDay.getMonth()+1}</span></div>
+                        <div class="day-card ${status}" id="card-${id}">
+                            <div class="day-header"><b>${dayName}</b> <span style="float:right; font-size:0.8rem; color:var(--text-light)">${cDay.getDate()}/${cDay.getMonth()+1}</span></div>
                             <div class="data-row">
-                                <div class="data-box"><small>Goal Cal</small><strong>${calT}</strong></div>
-                                <div class="data-box actual"><small>Actual</small><input type="text" id="cal-${dayId}" oninput="saveData()" placeholder="0"></div>
+                                <div class="data-box"><small>Goal Cal</small><br><span class="g-cal">${calT}</span></div>
+                                <div class="data-box actual"><small>Actual</small><input type="number" class="a-cal" id="cal-${id}" oninput="saveData()" placeholder="0"></div>
                             </div>
                             <div class="data-row">
-                                <div class="data-box"><small>Goal KG</small><strong>${wgtT}</strong></div>
-                                <div class="data-box actual"><small>Actual</small><input type="text" id="kg-${dayId}" oninput="saveData()" placeholder="0.0"></div>
+                                <div class="data-box"><small>Goal KG</small><br><span>${wgtT}</span></div>
+                                <div class="data-box actual"><small>Actual</small><input type="number" step="0.1" class="a-wgt" id="kg-${id}" oninput="saveData()" placeholder="0.0"></div>
                             </div>
                             <div class="checklist">
-                                ${["Breakfast Shake", "2 Boiled Eggs", "Lunch Shake", "Tuna (95g)", dinner, "10k Steps", "4L Water"].map((item, idx) => `
-                                    <label class="check-item"><input type="checkbox" id="chk-${dayId}-${idx}" onchange="updateDay('${dayId}')">${item}</label>
+                                ${["B-Shake", "2 Eggs", "L-Shake", "Tuna", dinner, "10k Steps", "4L Water"].map((item, idx) => `
+                                    <label class="check-item"><input type="checkbox" class="cb" id="chk-${id}-${idx}" onchange="updateDay('${id}')"> ${item}</label>
                                 `).join('')}
                             </div>
-                            <div class="progress-container"><div class="progress-bar" id="bar-${dayId}" style="background:var(--accent)"></div></div>
+                            <div class="progress-bar-wrap"><div class="progress-bar" id="bar-${id}"></div></div>
                         </div>`;
                 });
                 weeksHtml += `</div></div>`;
@@ -184,6 +140,7 @@
         }
 
         function showWeek(idx) {
+            currentWeekIdx = idx;
             document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
             document.querySelectorAll('.week-content').forEach((c, i) => c.classList.toggle('active', i === idx));
             window.scrollTo({top: 0, behavior: 'smooth'});
@@ -191,13 +148,27 @@
 
         function updateDay(id) {
             const card = document.getElementById(`card-${id}`);
-            const checks = card.querySelectorAll('input[type="checkbox"]');
-            const done = card.querySelectorAll('input[type="checkbox"]:checked').length;
-            const pct = (done / checks.length) * 100;
-            const bar = document.getElementById(`bar-${id}`);
-            bar.style.width = pct + '%';
-            bar.style.backgroundColor = pct === 100 ? 'var(--success)' : 'var(--accent)';
+            const done = card.querySelectorAll('.cb:checked').length;
+            const total = card.querySelectorAll('.cb').length;
+            document.getElementById(`bar-${id}`).style.width = (done / total * 100) + '%';
             saveData();
+        }
+
+        function updateDashboard() {
+            const week = document.getElementById(`week-${currentWeekIdx}`);
+            let gTotal = 0; let aTotal = 0;
+            week.querySelectorAll('.g-cal').forEach(v => gTotal += parseInt(v.innerText));
+            week.querySelectorAll('.a-cal').forEach(v => aTotal += parseInt(v.value || 0));
+            document.getElementById('stat-cal').innerText = `${aTotal} / ${gTotal}`;
+
+            let weights = Array.from(week.querySelectorAll('.a-wgt')).map(v => parseFloat(v.value)).filter(v => v > 0);
+            document.getElementById('stat-weight').innerText = weights.length ? weights[weights.length-1] + " kg" : "-- kg";
+
+            let totalCb = week.querySelectorAll('.cb').length;
+            let doneCb = week.querySelectorAll('.cb:checked').length;
+            let pct = Math.round((doneCb / totalCb) * 100) || 0;
+            document.getElementById('stat-pct').innerText = pct + '%';
+            document.getElementById('stat-bar').style.width = pct + '%';
         }
 
         function saveData() {
@@ -213,19 +184,15 @@
             if (!data) return;
             Object.keys(data).forEach(id => {
                 const el = document.getElementById(id);
-                if (el) {
-                    if (el.type === 'checkbox') el.checked = data[id];
-                    else el.value = data[id];
-                }
+                if (el) { if (el.type === 'checkbox') el.checked = data[id]; else el.value = data[id]; }
             });
             document.querySelectorAll('.day-card').forEach(c => updateDay(c.id.replace('card-','')));
         }
 
         setInterval(() => {
-            const now = new Date().getTime();
-            const dist = travelDate - now;
+            const dist = travelDate - new Date().getTime();
             if (dist < 0) return;
-            document.getElementById("timer").innerHTML = Math.floor(dist / 86400000) + "d " + Math.floor((dist % 86400000) / 3600000) + "h " + Math.floor((dist % 3600000) / 60000) + "m " + Math.floor((dist % 60000) / 1000) + "s ";
+            document.getElementById("timer").innerHTML = Math.floor(dist/86400000) + "d " + Math.floor((dist%86400000)/3600000) + "h " + Math.floor((dist%3600000)/60000) + "m";
         }, 1000);
 
         init();
